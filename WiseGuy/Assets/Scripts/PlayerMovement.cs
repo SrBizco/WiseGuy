@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
@@ -14,7 +14,7 @@ public class PlayerMovement : MonoBehaviour
     public float maxStamina = 100f;
     public float stamina;
     public float staminaRegenRate = 15f;
-    public float sprintStaminaCost = 20f; // por segundo
+    public float sprintStaminaCost = 20f;
     public float jumpStaminaCost = 30f;
 
     [Header("Mouse Look")]
@@ -28,13 +28,41 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        Initialize();
+    }
+
+    void OnEnable()
+    {
+        Initialize();
+    }
+
+    void Initialize()
+    {
         controller = GetComponent<CharacterController>();
-        Cursor.lockState = CursorLockMode.Locked;
+
+        if (playerCamera == null)
+        {
+            if (Camera.main != null)
+                playerCamera = Camera.main.transform;
+            else
+                Debug.LogWarning($"⚠️ {name} no tiene cámara asignada y no se encontró MainCamera.");
+        }
+
+        if (controller == null)
+        {
+            Debug.LogError($"❌ {name} necesita un CharacterController para funcionar.");
+            enabled = false;
+            return;
+        }
+
         stamina = maxStamina;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()
     {
+        if (controller == null) return;
+
         HandleMouseLook();
         HandleMovement();
         RegenerateStamina();
@@ -67,7 +95,6 @@ public class PlayerMovement : MonoBehaviour
 
         controller.Move(move * currentSpeed * Time.deltaTime);
 
-        // Salto
         if (Input.GetButtonDown("Jump") && jumpCount < maxJumps && stamina >= jumpStaminaCost)
         {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
@@ -81,6 +108,8 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleMouseLook()
     {
+        if (playerCamera == null) return;
+
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
@@ -93,7 +122,7 @@ public class PlayerMovement : MonoBehaviour
 
     void RegenerateStamina()
     {
-        if (!Input.GetKey(KeyCode.LeftShift)) // no correr = se regenera
+        if (!Input.GetKey(KeyCode.LeftShift))
         {
             stamina += staminaRegenRate * Time.deltaTime;
             stamina = Mathf.Clamp(stamina, 0f, maxStamina);

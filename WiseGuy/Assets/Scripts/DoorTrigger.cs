@@ -43,7 +43,7 @@ public class DoorTrigger : MonoBehaviour
         if (other.gameObject.layer == playerLayer)
         {
             playerNearby = true;
-            // Aquí podrías mostrar una UI: "Presiona E para entrar"
+            
         }
     }
 
@@ -52,7 +52,7 @@ public class DoorTrigger : MonoBehaviour
         if (other.gameObject.layer == playerLayer)
         {
             playerNearby = false;
-            // Aquí podrías ocultar la UI de interacción
+            
         }
     }
 }

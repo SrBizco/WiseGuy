@@ -129,7 +129,7 @@ public class SceneTransitionManager : MonoBehaviour
                 }
             }
 
-            yield return null; // esperar un frame
+            yield return null;
 
             if (!player.activeSelf)
             {
