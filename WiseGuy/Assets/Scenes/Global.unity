@@ -428,6 +428,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meleeClip: {fileID: 8300000, guid: 42486118d104fef4ca93058bc2fb0ad1, type: 3}
   shootClip: {fileID: 8300000, guid: 30b81e26198e3de4fbcd4970ee9651db, type: 3}
+  engineStartClip: {fileID: 8300000, guid: f3f71c43cf22bd240aaa9027380a2df7, type: 3}
+  engineLoopClip: {fileID: 8300000, guid: 88e7f48e941f9ea48bc9d02fb4d39a00, type: 3}
 --- !u!4 &886592840
 Transform:
   m_ObjectHideFlags: 0

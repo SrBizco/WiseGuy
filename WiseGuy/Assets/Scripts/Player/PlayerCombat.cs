@@ -41,6 +41,7 @@ public class PlayerCombat : MonoBehaviour
             Debug.LogError("❌ No se asignó 'pistolObject' en el inspector.");
         }
     }
+
     void Update()
     {
         HandleWeaponToggle();
@@ -70,15 +71,19 @@ public class PlayerCombat : MonoBehaviour
 
         lastMeleeTime = Time.time;
 
-        AudioManager.Instance?.PlayMelee(); // 🔊
+        AudioManager.Instance?.PlayMelee();
 
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, meleeRange))
         {
-            if (hit.collider.TryGetComponent<IDamageable>(out var target))
+            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("NPC"))
             {
-                target.TakeDamage(meleeDamage);
-                Debug.Log($"👊 Melee hit: {hit.collider.name}");
+                IDamageable target = hit.collider.GetComponentInParent<IDamageable>();
+                if (target != null)
+                {
+                    target.TakeDamage(meleeDamage);
+                    Debug.Log($"👊 Melee hit to NPC: {hit.collider.name}");
+                }
             }
         }
         else
@@ -95,10 +100,14 @@ public class PlayerCombat : MonoBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, shootRange))
         {
-            IDamageable target = hit.collider.GetComponent<IDamageable>();
-            if (target != null)
+            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("NPC"))
             {
-                target.TakeDamage(bulletDamage);
+                IDamageable target = hit.collider.GetComponentInParent<IDamageable>();
+                if (target != null)
+                {
+                    target.TakeDamage(bulletDamage);
+                    Debug.Log($"🔫 Shot hit to NPC: {hit.collider.name}");
+                }
             }
 
             VFXManager.Instance?.PlayHitEffect(hit.point, hit.normal);

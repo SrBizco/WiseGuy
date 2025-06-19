@@ -14,16 +14,22 @@ public class CarController : MonoBehaviour
     public float traction = 5f;
 
     private Rigidbody rb;
+    private bool engineStarted = false;
+    private bool engineStarting = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.drag = drag;
         rb.centerOfMass = new Vector3(0, -0.5f, 0);
+
+        StartEngine();
     }
 
     void FixedUpdate()
     {
+        if (!engineStarted || engineStarting) return;
+
         HandleMovement();
         ApplyTraction();
     }
@@ -33,7 +39,6 @@ public class CarController : MonoBehaviour
         float speedInput = Input.GetAxis("Vertical");
         float turnInput = Input.GetAxis("Horizontal");
 
-        // Aceleración
         if (speedInput != 0)
         {
             rb.AddForce(transform.forward * speedInput * acceleration * Time.fixedDeltaTime, ForceMode.Acceleration);
@@ -43,7 +48,6 @@ public class CarController : MonoBehaviour
             rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, deceleration * Time.fixedDeltaTime);
         }
 
-        // Limitar velocidad máxima
         Vector3 flatVelocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
         if (flatVelocity.magnitude > maxSpeed)
         {
@@ -51,7 +55,6 @@ public class CarController : MonoBehaviour
             rb.velocity = new Vector3(flatVelocity.x, rb.velocity.y, flatVelocity.z);
         }
 
-        // Giro corregido (inversión al ir en reversa)
         float direction = Mathf.Sign(Vector3.Dot(rb.velocity, transform.forward));
         float turnAmount = turnInput * turnSpeed * (rb.velocity.magnitude / maxSpeed) * direction;
         transform.Rotate(0, turnAmount, 0);
@@ -65,5 +68,40 @@ public class CarController : MonoBehaviour
 
         Vector3 correction = Quaternion.AngleAxis(angle, Vector3.up) * forward;
         rb.velocity = Vector3.Lerp(rb.velocity, correction * velocity.magnitude, traction * Time.fixedDeltaTime);
+    }
+
+    void StartEngine()
+    {
+        if (engineStarting || engineStarted) return;
+
+        engineStarting = true;
+        AudioManager.Instance.PlayEngineStart(() =>
+        {
+            engineStarting = false;
+            engineStarted = true;
+            AudioManager.Instance.PlayEngineLoop();
+        });
+    }
+
+    void OnDisable()
+    {
+        if (engineStarted || engineStarting)
+        {
+            engineStarted = false;
+            engineStarting = false;
+            AudioManager.Instance.StopEngineLoop();
+        }
+    }
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.TryGetComponent(out IDamageable damageable))
+        {
+            float impactForce = collision.relativeVelocity.magnitude;
+
+            if (impactForce > 5f) // Umbral razonable para 'atropello'
+            {
+                damageable.TakeDamage(999); // Mata al instante
+            }
+        }
     }
 }

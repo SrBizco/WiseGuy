@@ -789,10 +789,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meleeRange: 2
-  meleeDamage: 10
+  meleeDamage: 25
   meleeCooldown: 0.5
   shootRange: 100
-  bulletDamage: 25
+  bulletDamage: 100
   playerCamera: {fileID: 2676360124193536471}
   pistolObject: {fileID: 1011521740657998768}
 --- !u!1 &2847772596493248135
@@ -1678,7 +1678,7 @@ GameObject:
   - component: {fileID: 9206625491430869706}
   - component: {fileID: 2676360124193536471}
   - component: {fileID: 469754419371389031}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: PlayerCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
