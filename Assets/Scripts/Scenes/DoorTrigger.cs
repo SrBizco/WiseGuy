@@ -2,16 +2,14 @@
 
 public class DoorTrigger : MonoBehaviour
 {
-   
     public string sceneToLoad;
-
-   
     public bool isExit = false;
-
-    
     public int playerLayer = 6;
 
     private bool playerNearby = false;
+
+    [Header("Prompt")]
+    [SerializeField] private GameObject promptCanvas;
 
     void Update()
     {
@@ -27,7 +25,7 @@ public class DoorTrigger : MonoBehaviour
 
             if (string.IsNullOrEmpty(sceneToLoad))
             {
-                Debug.LogWarning(" sceneToLoad no está asignado en la puerta: " + gameObject.name);
+                Debug.LogWarning("sceneToLoad no está asignado en la puerta: " + gameObject.name);
                 return;
             }
 
@@ -43,7 +41,8 @@ public class DoorTrigger : MonoBehaviour
         if (other.gameObject.layer == playerLayer)
         {
             playerNearby = true;
-            
+            if (promptCanvas != null)
+                promptCanvas.SetActive(true);
         }
     }
 
@@ -52,7 +51,8 @@ public class DoorTrigger : MonoBehaviour
         if (other.gameObject.layer == playerLayer)
         {
             playerNearby = false;
-            
+            if (promptCanvas != null)
+                promptCanvas.SetActive(false);
         }
     }
 }

@@ -5,10 +5,15 @@ public class AudioManager : MonoBehaviour
     public static AudioManager Instance { get; private set; }
 
     [Header("SFX Clips")]
-    public AudioClip meleeClip;
-    public AudioClip shootClip;
-    public AudioClip engineStartClip;
-    public AudioClip engineLoopClip;
+    [SerializeField] private AudioClip meleeClip;
+    [SerializeField] private AudioClip shootClip;
+    [SerializeField] private AudioClip engineStartClip;
+    [SerializeField] private AudioClip engineLoopClip;
+
+    [SerializeField] private AudioClip jumpClip;
+    [SerializeField] private AudioClip damageClip;
+    [SerializeField] private AudioClip footstepClip;
+    [SerializeField] private AudioClip footstepGrassClip;
 
     private AudioSource sfxSource;
     private AudioSource engineSource;
@@ -40,6 +45,10 @@ public class AudioManager : MonoBehaviour
 
     public void PlayMelee() => PlaySFX(meleeClip);
     public void PlayShoot() => PlaySFX(shootClip);
+    public void PlayJump() => PlaySFX(jumpClip);
+    public void PlayDamage() => PlaySFX(damageClip);
+    public void PlayFootstep() => PlaySFX(footstepClip);
+    public void PlayFootstepGrass() => PlaySFX(footstepGrassClip);
 
     // 🚗 Audio de vehículo
     public void PlayEngineStart(System.Action onComplete = null)
@@ -54,7 +63,6 @@ public class AudioManager : MonoBehaviour
         engineSource.clip = engineStartClip;
         engineSource.Play();
 
-        // Llamar a onComplete cuando termine
         Instance.StartCoroutine(InvokeAfterDelay(engineStartClip.length, onComplete));
     }
 

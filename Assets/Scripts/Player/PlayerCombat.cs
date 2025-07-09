@@ -83,6 +83,7 @@ public class PlayerCombat : MonoBehaviour
                 {
                     target.TakeDamage(meleeDamage);
                     Debug.Log($"👊 Melee hit to NPC: {hit.collider.name}");
+                    PoliceManager.Instance.SetPlayerWanted(true);
                 }
             }
         }
@@ -107,6 +108,8 @@ public class PlayerCombat : MonoBehaviour
                 {
                     target.TakeDamage(bulletDamage);
                     Debug.Log($"🔫 Shot hit to NPC: {hit.collider.name}");
+                    PoliceManager.Instance.SetPlayerWanted(true);
+
                 }
             }
 

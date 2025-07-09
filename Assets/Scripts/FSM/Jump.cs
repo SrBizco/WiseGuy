@@ -20,7 +20,7 @@ public class Jump : BaseState
 
         reference.Animate(horizontal, vertical, isJumping);
 
-        if (reference.Controller.isGrounded && reference.Movement.velocity.y <= 0)
+        if (reference.Controller.isGrounded && reference.Movement.Velocity.y <= 0)
         {
             if (reference.Movement.isRunning)
                 fsm.ChangeTo(PlayerState.Run);

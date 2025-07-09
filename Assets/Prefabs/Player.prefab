@@ -656,6 +656,7 @@ GameObject:
   - component: {fileID: 8430490171157903284}
   - component: {fileID: 2720286222320094052}
   - component: {fileID: 986040480907225639}
+  - component: {fileID: 8039088067386836723}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -747,7 +748,7 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
-  m_Height: 1
+  m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2720286222320094052
@@ -766,16 +767,13 @@ MonoBehaviour:
   sprintSpeed: 15
   jumpForce: 2
   maxJumps: 2
-  jumpCount: 0
   maxStamina: 100
-  stamina: 0
   staminaRegenRate: 15
   sprintStaminaCost: 20
   jumpStaminaCost: 30
   mouseSensitivity: 400
   playerCamera: {fileID: 9206625491430869706}
-  velocity: {x: 0, y: 0, z: 0}
-  gravity: -10
+  stepInterval: 0.5
 --- !u!114 &986040480907225639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -795,6 +793,19 @@ MonoBehaviour:
   bulletDamage: 100
   playerCamera: {fileID: 2676360124193536471}
   pistolObject: {fileID: 1011521740657998768}
+--- !u!114 &8039088067386836723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2718435978832476204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb136c621d6ca4ebc9a79d665f3cf4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
 --- !u!1 &2847772596493248135
 GameObject:
   m_ObjectHideFlags: 0
@@ -1880,7 +1891,7 @@ Transform:
   m_GameObject: {fileID: 4798219994084440928}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.106, z: 0}
+  m_LocalPosition: {x: 0, y: -0.93, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

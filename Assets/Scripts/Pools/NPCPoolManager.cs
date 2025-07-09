@@ -23,7 +23,6 @@ public class NPCPoolManager : MonoBehaviour
 
     void Start()
     {
-        // Buscar cámara por layer (sin tags)
         if (playerCamera == null)
         {
             Camera[] allCameras = FindObjectsOfType<Camera>();
@@ -43,36 +42,46 @@ public class NPCPoolManager : MonoBehaviour
             }
         }
 
-        // Crear pool de NPCs
         for (int i = 0; i < poolSize; i++)
         {
             GameObject prefab = npcPrefabs[Random.Range(0, npcPrefabs.Count)];
             GameObject npc = Instantiate(prefab);
 
             var ragdoll = npc.GetComponent<RagdollActivator>();
-            ragdoll?.Initialize(); // Prepara los componentes incluso si está desactivado
+            ragdoll?.Initialize();
 
             npc.SetActive(false);
             npcPool.Add(npc);
         }
 
-        // Comenzar el ciclo de spawneo y despawneo
         InvokeRepeating(nameof(UpdateNPCPositions), 0f, 3f);
     }
 
     void UpdateNPCPositions()
     {
+        // ✅ Validar si player está sobre NavMesh
+        if (!IsPlayerOnNavMesh())
+        {
+            Debug.Log("⚠️ Player fuera del NavMesh. NPCs no se actualizarán hasta volver a zona válida.");
+            return;
+        }
+
         foreach (GameObject npc in npcPool)
         {
             if (!npc.activeInHierarchy)
             {
                 Vector3 spawnPos = RandomNavSphere(playerCamera.position, spawnRadius);
+
+                if (spawnPos == Vector3.negativeInfinity)
+                {
+                    Debug.Log("⚠️ No hay NavMesh cerca. NPC no spawneado.");
+                    continue;
+                }
+
                 npc.transform.position = spawnPos;
                 npc.transform.rotation = Quaternion.identity;
+                npc.SetActive(true);
 
-                npc.SetActive(true); // 🔄 Reactivar
-
-                // 🧠 Reactivar lógica y reiniciar estado
                 var civilian = npc.GetComponent<CivilianController>();
                 if (civilian != null)
                 {
@@ -97,8 +106,17 @@ public class NPCPoolManager : MonoBehaviour
         randDir += origin;
 
         if (NavMesh.SamplePosition(randDir, out NavMeshHit hit, dist, NavMesh.AllAreas))
+        {
             return hit.position;
+        }
         else
-            return origin; // fallback para evitar posición inválida
+        {
+            return Vector3.negativeInfinity;
+        }
+    }
+
+    bool IsPlayerOnNavMesh()
+    {
+        return NavMesh.SamplePosition(playerCamera.position, out NavMeshHit hit, 2f, NavMesh.AllAreas);
     }
 }

@@ -1,43 +1,49 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movimiento")]
-    public float walkSpeed = 7f;
-    public float sprintSpeed = 14f;
-    public float jumpForce = 5f;
-    public int maxJumps = 2;
-    public int jumpCount = 0;
+    [SerializeField] private float walkSpeed = 7f;
+    [SerializeField] private float sprintSpeed = 14f;
+    [SerializeField] private float jumpForce = 5f;
+    [SerializeField] private int maxJumps = 2;
+    private int jumpCount = 0;
 
     [Header("Stamina")]
-    public float maxStamina = 100f;
-    public float stamina;
-    public float staminaRegenRate = 15f;
-    public float sprintStaminaCost = 20f;
-    public float jumpStaminaCost = 30f;
+    [SerializeField] private float maxStamina = 100f;
+    [SerializeField] private float staminaRegenRate = 15f;
+    [SerializeField] private float sprintStaminaCost = 20f;
+    [SerializeField] private float jumpStaminaCost = 30f;
+    private float stamina;
 
     [Header("Mouse Look")]
-    public float mouseSensitivity = 100f;
-    public Transform playerCamera;
+    [SerializeField] private float mouseSensitivity = 100f;
+    [SerializeField] private Transform playerCamera;
     private float xRotation = 0f;
 
-    private CharacterController controller;
-    public CharacterController Controller => controller;
-    public Vector3 velocity;
-    public Vector3 Velocity => velocity;
-    public float gravity = -9.81f;
+    [Header("Footstep")]
+    [SerializeField] private float stepInterval = 0.5f;
+    private float stepTimer = 0f;
 
-    private FiniteStateMachine fsm = new FiniteStateMachine();
+    private CharacterController controller;
+    private Vector3 velocity;
+    private float gravity = -9.81f;
+
+    private FiniteStateMachine fsm;
 
     private bool isProp;
     public bool isWalking { get; private set; }
     public bool isRunning { get; private set; }
     public bool isJumping { get; private set; }
 
+    public Vector3 Velocity => velocity;
+
     void Start()
     {
         Initialize();
+        StartCoroutine(WaitForUIManagerAndSetStamina());
     }
 
     void OnEnable()
@@ -71,6 +77,16 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private IEnumerator WaitForUIManagerAndSetStamina()
+    {
+        while (NewUIManager.Instance == null)
+        {
+            yield return null;
+        }
+
+        NewUIManager.Instance.SetStamina(stamina, maxStamina);
+    }
+
     void Update()
     {
         if (controller == null) return;
@@ -89,7 +105,6 @@ public class PlayerMovement : MonoBehaviour
     {
         bool isGrounded = controller.isGrounded;
 
-        
         if (isGrounded && velocity.y < 0)
         {
             velocity.y = -2f;
@@ -111,21 +126,30 @@ public class PlayerMovement : MonoBehaviour
         {
             stamina -= sprintStaminaCost * Time.deltaTime;
             stamina = Mathf.Clamp(stamina, 0f, maxStamina);
+
+            if (NewUIManager.Instance != null)
+                NewUIManager.Instance.SetStamina(stamina, maxStamina);
         }
 
         controller.Move(move * currentSpeed * Time.deltaTime);
 
-      
         if (Input.GetButtonDown("Jump") && jumpCount < maxJumps && stamina >= jumpStaminaCost)
         {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
             jumpCount++;
             stamina -= jumpStaminaCost;
             isJumping = true;
+
+            if (NewUIManager.Instance != null)
+                NewUIManager.Instance.SetStamina(stamina, maxStamina);
+
+            AudioManager.Instance.PlayJump();
         }
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+
+        HandleFootsteps();
     }
 
     void HandleMouseLook()
@@ -148,6 +172,49 @@ public class PlayerMovement : MonoBehaviour
         {
             stamina += staminaRegenRate * Time.deltaTime;
             stamina = Mathf.Clamp(stamina, 0f, maxStamina);
+
+            if (NewUIManager.Instance != null)
+                NewUIManager.Instance.SetStamina(stamina, maxStamina);
         }
+    }
+
+    void HandleFootsteps()
+    {
+        if (isWalking && controller.isGrounded && velocity.y <= 0f)
+        {
+            stepTimer += Time.deltaTime;
+
+            if (stepTimer >= stepInterval)
+            {
+                if (IsOnGrass())
+                {
+                    AudioManager.Instance.PlayFootstepGrass();
+                }
+                else
+                {
+                    AudioManager.Instance.PlayFootstep();
+                }
+
+                stepTimer = 0f;
+            }
+        }
+        else
+        {
+            stepTimer = stepInterval;
+        }
+    }
+
+    private bool IsOnGrass()
+    {
+        Ray ray = new Ray(transform.position + Vector3.up * 0.5f, Vector3.down);
+
+        if (Physics.SphereCast(ray, 0.3f, out RaycastHit hit, 2f))
+        {
+            Debug.Log($"👣 Piso: {hit.collider.gameObject.name}, Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+            return hit.collider.gameObject.layer == LayerMask.NameToLayer("Grass");
+        }
+
+        Debug.Log("👣 No se detectó suelo bajo el jugador");
+        return false;
     }
 }
